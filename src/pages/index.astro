@@ -1,7 +1,9 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import BaseHead from "../components/BaseHead.astro";
+import Footer from "../components/Footer.astro";
+import Experience from "../components/Experience.astro";
+import ContributionsGraph from "../components/ContributionsGraph.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 ---
 
 <!doctype html>
@@ -11,9 +13,52 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
   </head>
   <body>
     <main>
-      <h1>Cory McDonald</h1>
-      <p>Site under construction.</p>
+      <section class="hero">
+        <h1>Cory McDonald</h1>
+        <p class="subtitle">Senior Software Engineer</p>
+        <p class="location">San Francisco Bay Area</p>
+      </section>
+
+      <section class="bio">
+        <p>
+          Software engineering leader with 8+ years building high-scale,
+          distributed systems across subscription and payment infrastructure.
+          Proven track record migrating production payment platforms, integrating
+          third-party processors, and leading cross-functional technical
+          projects.
+        </p>
+      </section>
+
+      <Experience />
+      <ContributionsGraph />
     </main>
     <Footer />
   </body>
 </html>
+
+<style>
+  .hero {
+    margin-bottom: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1.25rem;
+    color: var(--color-text-muted);
+    margin: 0.25rem 0;
+  }
+
+  .location {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .bio {
+    margin-bottom: 1rem;
+  }
+
+  .bio p {
+    font-size: 1.05rem;
+    line-height: 1.8;
+  }
+</style>

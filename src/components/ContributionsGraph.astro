@@ -2,7 +2,7 @@
 import { getAggregatedContributions } from "../lib/github";
 import type { AggregatedDay } from "../lib/github";
 
-const env = Astro.locals.runtime.env as { GITHUB_TOKEN: string };
+const env = (Astro.locals.runtime?.env ?? {}) as { GITHUB_TOKEN: string };
 const { days, total, error } = await getAggregatedContributions(env);
 
 // Build a 53×7 grid. GitHub's graph runs Sun(0)–Sat(6) top-to-bottom,

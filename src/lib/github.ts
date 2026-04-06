@@ -112,41 +112,35 @@ async function fetchUserCalendar(
 export async function getAggregatedContributions(env: {
   GITHUB_TOKEN: string;
 }): Promise<AggregatedResult> {
-  const cacheKey = "https://internal.cache/contributions-v1";
-  const cache = caches.default;
-
-  const cached = await cache.match(cacheKey);
-  if (cached) {
-    return cached.json() as Promise<AggregatedResult>;
-  }
-
   try {
+    const cacheKey = "https://internal.cache/contributions-v1";
+    const cache = (typeof caches !== "undefined" ? caches : null)?.default;
+
+    if (cache) {
+      const cached = await cache.match(cacheKey);
+      if (cached) {
+        return cached.json() as Promise<AggregatedResult>;
+      }
+    }
+
     const calendars = await Promise.all(
       GITHUB_USERS.map((login) => fetchUserCalendar(login, env.GITHUB_TOKEN))
     );
 
     const result = aggregateCalendars(calendars);
 
-    const response = new Response(JSON.stringify(result), {
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "public, max-age=86400",
-      },
-    });
-    await cache.put(cacheKey, response.clone());
+    if (cache) {
+      const response = new Response(JSON.stringify(result), {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "public, max-age=86400",
+        },
+      });
+      await cache.put(cacheKey, response.clone());
+    }
 
     return result;
   } catch (e) {
-    const errorResult: AggregatedResult = { days: [], total: 0, error: true };
-
-    const response = new Response(JSON.stringify(errorResult), {
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "public, max-age=300",
-      },
-    });
-    await cache.put(cacheKey, response.clone());
-
-    return errorResult;
+    return { days: [], total: 0, error: true };
   }
 }
