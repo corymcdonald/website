@@ -18,6 +18,7 @@
 		"typescript": "5.9.3"
 	},
 	"devDependencies": {
+		"vitest": "^4.1.2",
 		"wrangler": "4.56.0"
 	},
 	"engines": {
@@ -31,7 +32,8 @@
 		"check": "astro build && tsc && wrangler deploy --dry-run",
 		"deploy": "wrangler deploy",
 		"dev": "astro dev",
-		"preview": "astro build && wrangler dev"
+		"preview": "astro build && wrangler dev",
+		"test": "vitest run"
 	},
 	"type": "module"
 }
