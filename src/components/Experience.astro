@@ -1,0 +1,99 @@
+---
+interface Job {
+  company: string;
+  role: string;
+  period: string;
+  summary: string;
+}
+
+const jobs: Job[] = [
+  {
+    company: "Unrivaled Basketball",
+    role: "Senior Software Engineer",
+    period: "Aug 2025 – Present",
+    summary:
+      "Led Shopify ecommerce and PoS implementation driving $3M in sales. Built data pipelines, user account system (60K users in 4 months), and a fan bracket product (168K unique visitors).",
+  },
+  {
+    company: "Bark",
+    role: "Sr. Engineering Manager, Payments & Assignment",
+    period: "Aug 2023 – Aug 2025",
+    summary:
+      "Managed two teams. Migrated 1M active subscriptions to Shopify. Led fraud platform migration from Kount to Signifyd, reducing chargeback fees by $1.1M/year.",
+  },
+  {
+    company: "Bark",
+    role: "Engineering Manager, Payments",
+    period: "Oct 2020 – Aug 2023",
+    summary:
+      "Scaled a fully remote team from 1 to 8 engineers across 5 timezones. Led Apple Pay and Venmo integration achieving 35% subscriber adoption.",
+  },
+  {
+    company: "Brave",
+    role: "Senior Software Engineer",
+    period: "Nov 2018 – Oct 2020",
+    summary:
+      "Team Lead for Creators payments platform. Built privacy-preserving e-commerce system in Golang. Led Heroku to AWS EKS migration. Maintained endpoints serving 6M daily browsers at 1K RPS.",
+  },
+  {
+    company: "Cerner (acquired by Oracle)",
+    role: "Software Engineer",
+    period: "May 2016 – Nov 2018",
+    summary:
+      "Built and maintained 8 Ruby on Rails applications. Mentored 8+ engineers in development academy. Led weekly operations review uncovering previously undetected defects.",
+  },
+  {
+    company: "J.B. Hunt Transport Services",
+    role: "Software Engineering Intern",
+    period: "Jan 2012 – Jun 2016",
+    summary:
+      "Youngest hire in the technology department. Won 2015 Hackathon with a Rails recruitment app. Built a WYSIWYG editor integrated into the company knowledge sharing system.",
+  },
+];
+---
+
+<section class="experience">
+  <h2>Experience</h2>
+  <div class="timeline">
+    {jobs.map((job) => (
+      <div class="job">
+        <div class="job-header">
+          <strong>{job.role}</strong>
+          <span class="job-meta">
+            {job.company} &middot; {job.period}
+          </span>
+        </div>
+        <p class="job-summary">{job.summary}</p>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .experience {
+    margin-top: 3rem;
+  }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .job-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .job-meta {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  .job-summary {
+    margin-top: 0.35rem;
+    font-size: 0.95rem;
+    color: var(--color-text);
+  }
+</style>
