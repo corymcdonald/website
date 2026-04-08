@@ -1,13 +1,12 @@
 ---
-import { getAggregatedContributions } from "../lib/github";
+import { getMultiYearContributions } from "../lib/github";
 import type { AggregatedDay } from "../lib/github";
 
 const env = (Astro.locals.runtime?.env ?? {}) as { GITHUB_TOKEN: string };
-const { days, total, error } = await getAggregatedContributions(env);
+const { trailing, years: yearData, error } = await getMultiYearContributions(env);
 
-// Build a 53×7 grid. GitHub's graph runs Sun(0)–Sat(6) top-to-bottom,
+// Build a 53x7 grid. GitHub's graph runs Sun(0)-Sat(6) top-to-bottom,
 // weeks left-to-right, most recent week on the right.
-// We need to map each day to (weekColumn, dayRow).
 const cellSize = 11;
 const cellGap = 3;
 const cellStep = cellSize + cellGap;
@@ -21,13 +20,47 @@ interface Cell {
   count: number;
 }
 
-const cells: Cell[] = [];
+interface GraphEntry {
+  key: string;
+  label: string;
+  cells: Cell[];
+  monthLabels: Array<{ text: string; x: number }>;
+  svgWidth: number;
+  total: number;
+  totalLabel: string;
+}
 
-if (days.length > 0) {
-  // Find the date range: last 53 weeks ending on the most recent Saturday
-  // or the last date in the data.
+const monthNames = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+const dayLabels = [
+  { text: "Mon", y: 1 * cellStep + cellSize / 2 },
+  { text: "Wed", y: 3 * cellStep + cellSize / 2 },
+  { text: "Fri", y: 5 * cellStep + cellSize / 2 },
+];
+
+const svgHeight = 7 * cellStep + 20;
+
+// ---------------------------------------------------------------------------
+// Trailing 365-day graph — matches the original implementation exactly.
+// Uses data from GitHub's default contributionsCollection (no from/to),
+// which returns the last 365 days ending today.
+// ---------------------------------------------------------------------------
+function buildTrailingGraph(days: AggregatedDay[], total: number): GraphEntry {
+  const cells: Cell[] = [];
+
+  if (days.length === 0) {
+    return {
+      key: "trailing", label: "Last year", cells,
+      monthLabels: [], svgWidth: labelWidth, total: 0,
+      totalLabel: "0 contributions in the last year",
+    };
+  }
+
+  // Find the date range: last 53 weeks ending on the most recent date.
   const lastDate = new Date(days[days.length - 1].date);
-  // Walk back to fill 53 weeks (371 days)
   const startDate = new Date(lastDate);
   startDate.setDate(startDate.getDate() - 364);
   // Align startDate to Sunday
@@ -58,80 +91,199 @@ if (days.length > 0) {
     }
     cursor.setDate(cursor.getDate() + 1);
   }
-}
 
-const svgWidth = labelWidth + 53 * cellStep;
-const svgHeight = 7 * cellStep + 20; // extra space for month labels
-
-// Month labels: find the first occurrence of each month in the grid
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const monthLabels: Array<{ text: string; x: number }> = [];
-let lastMonth = -1;
-for (const cell of cells) {
-  const d = new Date(cell.date);
-  const m = d.getMonth();
-  if (m !== lastMonth && d.getDay() === 0) {
-    monthLabels.push({ text: months[m], x: cell.x });
-    lastMonth = m;
+  const monthLabels: Array<{ text: string; x: number }> = [];
+  let lastMonth = -1;
+  for (const cell of cells) {
+    const d = new Date(cell.date);
+    const m = d.getMonth();
+    if (m !== lastMonth && d.getDay() === 0) {
+      monthLabels.push({ text: monthNames[m], x: cell.x });
+      lastMonth = m;
+    }
   }
+
+  const svgWidth = labelWidth + 53 * cellStep;
+
+  return {
+    key: "trailing",
+    label: "Last year",
+    cells,
+    monthLabels,
+    svgWidth,
+    total,
+    totalLabel: `${total.toLocaleString()} contributions in the last year`,
+  };
 }
 
-const dayLabels = [
-  { text: "Mon", y: 1 * cellStep + cellSize / 2 },
-  { text: "Wed", y: 3 * cellStep + cellSize / 2 },
-  { text: "Fri", y: 5 * cellStep + cellSize / 2 },
-];
+// ---------------------------------------------------------------------------
+// Calendar-year graph (Jan 1 – Dec 31)
+// ---------------------------------------------------------------------------
+function buildCalendarYearGraph(year: number, days: AggregatedDay[], total: number): GraphEntry {
+  const cells: Cell[] = [];
+
+  if (days.length === 0) {
+    return {
+      key: String(year), label: String(year), cells,
+      monthLabels: [], svgWidth: labelWidth, total: 0,
+      totalLabel: `0 contributions in ${year}`,
+    };
+  }
+
+  const jan1 = new Date(year, 0, 1);
+  const dec31 = new Date(year, 11, 31);
+
+  // Align grid to the Sunday on or before Jan 1
+  const gridStart = new Date(jan1);
+  gridStart.setDate(gridStart.getDate() - gridStart.getDay());
+
+  const dayMap = new Map<string, AggregatedDay>();
+  for (const d of days) {
+    dayMap.set(d.date, d);
+  }
+
+  const cursor = new Date(gridStart);
+  let weekCol = 0;
+  let maxWeekCol = 0;
+
+  while (cursor <= dec31) {
+    const dayOfWeek = cursor.getDay();
+    const iso = cursor.toISOString().split("T")[0];
+    const dayData = dayMap.get(iso);
+
+    cells.push({
+      x: labelWidth + weekCol * cellStep,
+      y: dayOfWeek * cellStep,
+      level: dayData?.level ?? 0,
+      date: iso,
+      count: dayData?.count ?? 0,
+    });
+
+    maxWeekCol = Math.max(maxWeekCol, weekCol);
+
+    if (dayOfWeek === 6) {
+      weekCol++;
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  // Skip month labels for pre-Jan-1 padding days
+  const monthLabels: Array<{ text: string; x: number }> = [];
+  let lastMonth = -1;
+  for (const cell of cells) {
+    const d = new Date(cell.date);
+    if (d.getFullYear() < year) continue;
+    const m = d.getMonth();
+    if (m !== lastMonth && d.getDay() === 0) {
+      monthLabels.push({ text: monthNames[m], x: cell.x });
+      lastMonth = m;
+    }
+  }
+
+  const svgWidth = labelWidth + (maxWeekCol + 1) * cellStep;
+
+  return {
+    key: String(year),
+    label: String(year),
+    cells,
+    monthLabels,
+    svgWidth,
+    total,
+    totalLabel: `${total.toLocaleString()} contributions in ${year}`,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Assemble all graphs
+// ---------------------------------------------------------------------------
+const trailingGraph = buildTrailingGraph(trailing.days, trailing.total);
+
+const sortedYears = Object.keys(yearData)
+  .map(Number)
+  .sort((a, b) => b - a);
+
+const calendarGraphs = sortedYears.map((year) =>
+  buildCalendarYearGraph(year, yearData[year].days, yearData[year].total)
+);
+
+const graphs = [trailingGraph, ...calendarGraphs];
+const defaultKey = "trailing";
 ---
 
 <section class="contributions">
-  <h2>Contributions</h2>
+  <div class="contributions-header">
+    <h2>Contributions</h2>
+
+    {!error && graphs.length > 0 && (
+      <div class="year-selector">
+        {graphs.map(({ key, label }) => (
+          <button
+            class:list={["year-btn", { active: key === defaultKey }]}
+            data-key={key}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
 
   {error ? (
     <p class="error-caption">Contributions graph temporarily unavailable.</p>
   ) : (
     <>
-      <div class="graph-scroll">
-        <svg
-          width={svgWidth}
-          height={svgHeight}
-          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-          role="img"
-          aria-label={`GitHub contribution graph showing ${total} contributions in the last year`}
+      {graphs.map(({ key, cells, monthLabels, svgWidth, totalLabel }) => (
+        <div
+          class="graph-panel"
+          data-key={key}
+          style={key !== defaultKey ? "display:none" : undefined}
         >
-          {dayLabels.map(({ text, y }) => (
-            <text x="0" y={y} class="graph-label" dominant-baseline="central">
-              {text}
-            </text>
-          ))}
-
-          {monthLabels.map(({ text, x }) => (
-            <text x={x} y={7 * cellStep + 14} class="graph-label">
-              {text}
-            </text>
-          ))}
-
-          {cells.map(({ x, y, level, date, count }) => (
-            <rect
-              x={x}
-              y={y}
-              width={cellSize}
-              height={cellSize}
-              rx="2"
-              ry="2"
-              class={`level-${level}`}
+          <div class="graph-scroll">
+            <svg
+              width={svgWidth}
+              height={svgHeight}
+              viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+              role="img"
+              aria-label={`GitHub contribution graph – ${totalLabel}`}
             >
-              <title>{`${date}: ${count} contribution${count !== 1 ? "s" : ""}`}</title>
-            </rect>
-          ))}
-        </svg>
-      </div>
+              {dayLabels.map(({ text, y }) => (
+                <text x="0" y={y} class="graph-label" dominant-baseline="central">
+                  {text}
+                </text>
+              ))}
 
-      <p class="graph-total">{total.toLocaleString()} contributions in the last year</p>
+              {monthLabels.map(({ text, x }) => (
+                <text x={x} y={7 * cellStep + 14} class="graph-label">
+                  {text}
+                </text>
+              ))}
+
+              {cells.map(({ x, y, level, date, count }) => (
+                <rect
+                  x={x}
+                  y={y}
+                  width={cellSize}
+                  height={cellSize}
+                  rx="2"
+                  ry="2"
+                  class={`level-${level}`}
+                  data-date={date}
+                  data-count={count}
+                />
+              ))}
+            </svg>
+          </div>
+
+          <p class="graph-total">{totalLabel}</p>
+        </div>
+      ))}
     </>
   )}
 
+  <div class="contrib-tooltip" aria-hidden="true"></div>
+
   <p class="graph-caption">
-    Aggregated across personal and work GitHub accounts. Excludes Cerner (private enterprise).
+    Aggregated across personal and work GitHub accounts.
   </p>
   <ul class="graph-accounts">
     <li><a href="https://github.com/corymcdonald">Personal (corymcdonald)</a></li>
@@ -140,9 +292,109 @@ const dayLabels = [
   </ul>
 </section>
 
+<script>
+  // Year selector
+  document.querySelectorAll<HTMLButtonElement>(".year-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.key;
+      document
+        .querySelectorAll<HTMLButtonElement>(".year-btn")
+        .forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      document
+        .querySelectorAll<HTMLElement>(".graph-panel")
+        .forEach((g) => {
+          g.style.display = g.dataset.key === key ? "" : "none";
+        });
+    });
+  });
+
+  // Tooltip
+  const tooltip = document.querySelector<HTMLElement>(".contrib-tooltip");
+  if (tooltip) {
+    const section = document.querySelector<HTMLElement>(".contributions")!;
+
+    function formatDate(iso: string): string {
+      const d = new Date(iso + "T00:00:00");
+      return d.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+    }
+
+    section.addEventListener("mouseenter", (e) => {
+      const rect = (e.target as Element).closest?.("rect[data-date]");
+      if (!rect) return;
+      const count = Number(rect.getAttribute("data-count"));
+      const date = rect.getAttribute("data-date")!;
+      const label =
+        count === 0
+          ? `No contributions on ${formatDate(date)}`
+          : `${count} contribution${count !== 1 ? "s" : ""} on ${formatDate(date)}`;
+      tooltip!.textContent = label;
+      tooltip!.classList.add("visible");
+
+      const box = rect.getBoundingClientRect();
+      const sectionBox = section.getBoundingClientRect();
+      const tipWidth = tooltip!.offsetWidth;
+      tooltip!.style.left = `${box.left - sectionBox.left + box.width / 2 - tipWidth / 2}px`;
+      tooltip!.style.top = `${box.top - sectionBox.top - 30}px`;
+    }, true);
+
+    section.addEventListener("mouseleave", (e) => {
+      const rect = (e.target as Element).closest?.("rect[data-date]");
+      if (!rect) return;
+      tooltip!.classList.remove("visible");
+    }, true);
+  }
+</script>
+
 <style>
   .contributions {
     margin-top: 3rem;
+  }
+
+  .contributions-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .contributions-header h2 {
+    margin: 0;
+  }
+
+  .year-selector {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .year-btn {
+    background: transparent;
+    border: 1px solid var(--color-border, #333);
+    color: var(--color-text-muted);
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .year-btn:hover {
+    background: var(--color-surface, #1a1a2e);
+    color: var(--color-text);
+  }
+
+  .year-btn.active {
+    background: var(--color-accent, #7c3aed);
+    color: #fff;
+    border-color: var(--color-accent, #7c3aed);
   }
 
   .graph-scroll {
@@ -192,5 +444,28 @@ const dayLabels = [
     flex-wrap: wrap;
     gap: 1rem;
     font-size: 0.85rem;
+  }
+
+  .contributions {
+    position: relative;
+  }
+
+  .contrib-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: #24292f;
+    color: #fff;
+    font-size: 0.75rem;
+    line-height: 1;
+    padding: 0.4rem 0.55rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.1s;
+    z-index: 10;
+  }
+
+  .contrib-tooltip.visible {
+    opacity: 1;
   }
 </style>
