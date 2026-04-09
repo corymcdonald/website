@@ -1,53 +1,98 @@
 ---
-interface Job {
-  company: string;
-  role: string;
+interface Role {
+  title: string;
   period: string;
   summary: string;
+}
+
+interface Job {
+  company: string;
+  url?: string;
+  period: string;
+  tags?: string[];
+  roles: Role[];
 }
 
 const jobs: Job[] = [
   {
     company: "Unrivaled Basketball",
-    role: "Senior Software Engineer",
+    url: "https://www.unrivaled.basketball",
     period: "Aug 2025 – Present",
-    summary:
-      "Led Shopify ecommerce and PoS implementation driving $3M in sales. Built data pipelines, user account system (60K users in 4 months), and a fan bracket product (168K unique visitors).",
+    roles: [
+      {
+        title: "Senior Software Engineer",
+        period: "Aug 2025 – Present",
+        summary:
+          "Everyone watches Unrivaled. 60K registered users in 3 months. Launched Shopify Store. $4M in sales. Built data pipelines. Stood up Metabase for real-time business metrics.",
+      },
+    ],
   },
   {
-    company: "Bark",
-    role: "Sr. Engineering Manager, Payments & Assignment",
-    period: "Aug 2023 – Aug 2025",
-    summary:
-      "Managed two teams. Migrated 1M active subscriptions to Shopify. Led fraud platform migration from Kount to Signifyd, reducing chargeback fees by $1.1M/year.",
-  },
-  {
-    company: "Bark",
-    role: "Engineering Manager, Payments",
-    period: "Oct 2020 – Aug 2023",
-    summary:
-      "Scaled a fully remote team from 1 to 8 engineers across 5 timezones. Led Apple Pay and Venmo integration achieving 35% subscriber adoption.",
+    company: "BARK",
+    url: "https://bark.co",
+    period: "Oct 2020 – Aug 2025",
+    tags: ["Pre-IPO → IPO"],
+    roles: [
+      {
+        title: "Sr. Engineering Manager, Payments & Assignment",
+        period: "Aug 2023 – Aug 2025",
+        summary:
+          "Led three major platform migrations across payments, fraud, and order fulfillment. 1M subscriptions. $1.1M/year saved in chargebacks.",
+      },
+      {
+        title: "Engineering Manager, Payments",
+        period: "Oct 2020 – Aug 2023",
+        summary:
+          "Scaled a remote payments team from 1 to 8. Hands-on. Created subscription flows, launched variable shipping rates in Rails/Vue. Championed GitHub Copilot for org. 10% throughput increase.",
+      },
+    ],
   },
   {
     company: "Brave",
-    role: "Senior Software Engineer",
+    url: "https://brave.com",
     period: "Nov 2018 – Oct 2020",
-    summary:
-      "Team Lead for Creators payments platform. Built privacy-preserving e-commerce system in Golang. Led Heroku to AWS EKS migration. Maintained endpoints serving 6M daily browsers at 1K RPS.",
+    tags: ["Open Source"],
+    roles: [
+      {
+        title: "Senior Software Engineer",
+        period: "Nov 2018 – Oct 2020",
+        summary:
+          "Payments for content creators. Onboarded Wikipedia, The Guardian, and The Washington Post. Golang e-commerce system. Created endpoints for 6M browsers, 1K RPS, privacy by design.",
+      },
+    ],
   },
   {
-    company: "Cerner (acquired by Oracle)",
-    role: "Software Engineer",
+    company: "Cerner",
+    url: "https://www.oracle.com/health/",
     period: "May 2016 – Nov 2018",
-    summary:
-      "Built and maintained 8 Ruby on Rails applications. Mentored 8+ engineers in development academy. Led weekly operations review uncovering previously undetected defects.",
+    tags: ["Fortune 500", "Acquired by Oracle"],
+    roles: [
+      {
+        title: "Senior Software Engineer",
+        period: "Apr 2018 – Nov 2018",
+        summary:
+          "Mentored 5+ early career engineers in DevAcademy. Led weekly operations review uncovering previously undetected defects. Gave talks on React and TypeScript.",
+      },
+      {
+        title: "Software Engineer",
+        period: "May 2016 – Apr 2018",
+        summary:
+          "Built and maintained 8 Ruby on Rails applications. Created, tested, and code reviewed features across the platform.",
+      },
+    ],
   },
   {
     company: "J.B. Hunt Transport Services",
-    role: "Software Engineering Intern",
+    url: "https://www.jbhunt.com",
     period: "Jan 2012 – Jun 2016",
-    summary:
-      "Youngest hire in the technology department. Won 2015 Hackathon with a Rails recruitment app. Built a WYSIWYG editor integrated into the company knowledge sharing system.",
+    tags: ["Fortune 500"],
+    roles: [
+      {
+        title: "Software Engineering Intern",
+        period: "Jan 2012 – Jun 2016",
+        summary: "Youngest hire in tech org. Won company Hackathon. Built tools in C#, JavaScript, and Rails. Earned my B.S. in Computer Science at same time.",
+      },
+    ],
   },
 ];
 ---
@@ -58,12 +103,31 @@ const jobs: Job[] = [
     {jobs.map((job) => (
       <div class="job">
         <div class="job-header">
-          <strong>{job.role}</strong>
           <span class="job-meta">
-            {job.company} &middot; {job.period}
+            {job.url ? (
+              <a href={job.url} target="_blank" rel="noopener noreferrer"><strong>{job.company}</strong></a>
+            ) : (
+              <strong>{job.company}</strong>
+            )}
+            &middot; {job.period}
+            {job.tags?.map((tag) => (
+              <span class="tag">{tag}</span>
+            ))}
           </span>
         </div>
-        <p class="job-summary">{job.summary}</p>
+        <div class={job.roles!.length > 1 ? "grouped-roles" : "single-role"}>
+          {job.roles!.map((role) => (
+            <div class="sub-role">
+              <div class="sub-role-header">
+                <strong>{role.title}</strong>
+                {job.roles!.length > 1 && (
+                  <span class="job-meta">{role.period}</span>
+                )}
+              </div>
+              <p class="job-summary">{role.summary}</p>
+            </div>
+          ))}
+        </div>
       </div>
     ))}
   </div>
@@ -89,6 +153,37 @@ const jobs: Job[] = [
   .job-meta {
     font-size: 0.9rem;
     color: var(--color-text-muted);
+  }
+
+  .tag {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 9999px;
+    background: var(--color-tag-bg);
+    color: var(--color-tag-text);
+    font-weight: 500;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+  }
+
+  .single-role {
+    margin-top: 0.25rem;
+  }
+
+
+  .grouped-roles {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--color-border);
+  }
+
+  .sub-role-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
   }
 
   .job-summary {

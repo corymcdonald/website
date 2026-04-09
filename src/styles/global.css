@@ -5,6 +5,8 @@
   --color-link: #2563eb;
   --color-link-hover: #1d4ed8;
   --color-border: #e5e7eb;
+  --color-tag-bg: #e5e7eb;
+  --color-tag-text: #374151;
 
   /* Contributions graph — 5 levels, light mode */
   --graph-0: #ebedf0;
@@ -22,6 +24,8 @@
     --color-link: #60a5fa;
     --color-link-hover: #93bbfd;
     --color-border: #2d2d2d;
+    --color-tag-bg: #2d2d2d;
+    --color-tag-text: #d1d5db;
 
     --graph-0: #161b22;
     --graph-1: #0e4429;
