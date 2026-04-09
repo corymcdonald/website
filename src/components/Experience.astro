@@ -18,6 +18,7 @@ const jobs: Job[] = [
     company: "Unrivaled Basketball",
     url: "https://www.unrivaled.basketball",
     period: "Aug 2025 – Present",
+    tags: ["Startup"],
     roles: [
       {
         title: "Senior Software Engineer",
@@ -43,7 +44,7 @@ const jobs: Job[] = [
         title: "Engineering Manager, Payments",
         period: "Oct 2020 – Aug 2023",
         summary:
-          "Scaled a remote payments team from 1 to 8. Hands-on. Created subscription flows, launched variable shipping rates in Rails/Vue. Championed GitHub Copilot for org. 10% throughput increase.",
+          "Scaled a remote payments team from 1 to 8. Hands-on technical role. Created subscription flows, launched variable shipping rates in Rails/Vue. Championed GitHub Copilot for org. 10% throughput increase.",
       },
     ],
   },
@@ -51,7 +52,7 @@ const jobs: Job[] = [
     company: "Brave",
     url: "https://brave.com",
     period: "Nov 2018 – Oct 2020",
-    tags: ["Open Source"],
+    tags: ["Startup", "Open Source"],
     roles: [
       {
         title: "Senior Software Engineer",
@@ -184,6 +185,10 @@ const jobs: Job[] = [
     display: flex;
     flex-direction: column;
     gap: 0.1rem;
+  }
+
+  .sub-role-header strong {
+    font-size: 0.95rem;
   }
 
   .job-summary {
