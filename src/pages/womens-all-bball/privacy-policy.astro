@@ -1,0 +1,144 @@
+---
+import BaseHead from "../../components/BaseHead.astro";
+import Footer from "../../components/Footer.astro";
+
+const title = "Privacy Policy — Women's All B-Ball";
+const description = "Privacy Policy for the Women's All B-Ball app.";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={title} description={description} />
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <h1>Privacy Policy</h1>
+        <p class="meta">Women's All B-Ball &middot; Effective April 1, 2026</p>
+      </section>
+
+      <section>
+        <h2>Information We Collect</h2>
+        <ul>
+          <li>
+            <strong>Personal info:</strong> first name (required), last name
+            (required), email address (optional).
+          </li>
+          <li>
+            <strong>Device info:</strong> push notification token (optional, if
+            you opt in to notifications).
+          </li>
+          <li>
+            <strong>Usage data:</strong> game participation, queue and waitlist
+            activity, win/loss records.
+          </li>
+          <li>
+            <strong>Analytics:</strong> PostHog collects screen views, app usage
+            events, and user-identified properties (name, role, email).
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>How We Use Your Information</h2>
+        <p>
+          We use the information above to operate the app, manage games and
+          waitlists, send push notifications (if you've opted in), and improve
+          the app through analytics.
+        </p>
+      </section>
+
+      <section>
+        <h2>Third-Party Services</h2>
+        <p>
+          The app relies on the following services to operate. Each has its own
+          privacy policy governing the data it processes.
+        </p>
+        <ul>
+          <li>
+            <a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer">Supabase</a>
+            — database hosting
+          </li>
+          <li>
+            <a href="https://clerk.com/legal/privacy" target="_blank" rel="noopener noreferrer">Clerk</a>
+            — optional authentication
+          </li>
+          <li>
+            <a href="https://posthog.com/privacy" target="_blank" rel="noopener noreferrer">PostHog</a>
+            — analytics
+          </li>
+          <li>
+            <a href="https://ably.com/privacy" target="_blank" rel="noopener noreferrer">Ably</a>
+            — real-time updates
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Data Retention</h2>
+        <p>
+          We keep your data for as long as your account exists. You can request
+          deletion of your data at any time by emailing us.
+        </p>
+      </section>
+
+      <section>
+        <h2>Data Sharing</h2>
+        <p>
+          We do not sell your data. We share information only with the
+          third-party services listed above as needed to operate the app.
+        </p>
+      </section>
+
+      <section>
+        <h2>Children's Privacy</h2>
+        <p>
+          The app is not directed at children under 13. We do not knowingly
+          collect personal information from children under 13.
+        </p>
+      </section>
+
+      <section>
+        <h2>Changes to This Policy</h2>
+        <p>
+          We may update this policy from time to time. Continued use of the app
+          after changes means you accept the revised policy.
+        </p>
+      </section>
+
+      <section>
+        <h2>Contact</h2>
+        <p>
+          Questions about this policy? Email
+          <a href="mailto:developer@corywmcdonald.com">developer@corywmcdonald.com</a>.
+        </p>
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  .hero {
+    margin-bottom: 2rem;
+  }
+
+  .meta {
+    color: var(--color-text-muted);
+    margin: 0.25rem 0 0;
+    font-size: 0.95rem;
+  }
+
+  ul {
+    padding-left: 1.25rem;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+  }
+
+  section + section {
+    margin-top: 1rem;
+  }
+</style>

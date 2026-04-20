@@ -1,0 +1,80 @@
+---
+import BaseHead from "../../components/BaseHead.astro";
+import Footer from "../../components/Footer.astro";
+
+const title = "Women's All B-Ball";
+const description =
+  "Community pickup basketball league management — join waitlists via QR code, get queued into teams, track games and win streaks.";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={title} description={description} />
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <h1>Women's All B-Ball</h1>
+        <p class="subtitle">Community pickup basketball, organized.</p>
+      </section>
+
+      <section>
+        <p>
+          Women's All B-Ball is a mobile app for managing community pickup
+          basketball leagues. Scan a QR code at the gym to join the night's
+          waitlist, get queued into teams of five, and track games and win
+          streaks as you play.
+        </p>
+      </section>
+
+      <section>
+        <h2>Features</h2>
+        <ul>
+          <li>QR code check-in to join a night's waitlist</li>
+          <li>Automatic team formation as players arrive</li>
+          <li>Live game tracking with win streaks and team history</li>
+          <li>Optional push notifications when it's your team's turn</li>
+          <li>Guest registration — just a first name to play</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Legal</h2>
+        <ul>
+          <li><a href="/womens-all-bball/tos/">Terms of Service</a></li>
+          <li><a href="/womens-all-bball/privacy-policy/">Privacy Policy</a></li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Contact</h2>
+        <p>
+          Questions or feedback?
+          <a href="mailto:developer@corywmcdonald.com">developer@corywmcdonald.com</a>
+        </p>
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  .hero {
+    margin-bottom: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1.25rem;
+    color: var(--color-text-muted);
+    margin: 0.25rem 0 0;
+  }
+
+  ul {
+    padding-left: 1.25rem;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+  }
+</style>

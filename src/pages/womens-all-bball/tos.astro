@@ -1,0 +1,116 @@
+---
+import BaseHead from "../../components/BaseHead.astro";
+import Footer from "../../components/Footer.astro";
+
+const title = "Terms of Service — Women's All B-Ball";
+const description = "Terms of Service for the Women's All B-Ball app.";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={title} description={description} />
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <h1>Terms of Service</h1>
+        <p class="meta">Women's All B-Ball &middot; Effective April 1, 2026</p>
+      </section>
+
+      <section>
+        <h2>1. Acceptance of Terms</h2>
+        <p>
+          By using Women's All B-Ball ("the app"), you agree to these Terms of
+          Service. If you do not agree, please do not use the app.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Description of Service</h2>
+        <p>
+          Women's All B-Ball is a community pickup basketball league management
+          app. It lets players join waitlists at a gym via QR code, get queued
+          into teams of five, and track games and win streaks.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. User Accounts</h2>
+        <p>
+          You can participate as a guest by providing a first name (last name
+          required; email optional). You may also link a Clerk-authenticated
+          account if you'd like a persistent profile across devices. You are
+          responsible for the accuracy of the information you provide.
+        </p>
+      </section>
+
+      <section>
+        <h2>4. Acceptable Use</h2>
+        <p>
+          Please don't abuse the service, impersonate other players, disrupt
+          games, or use the app in a way that interferes with others' enjoyment.
+        </p>
+      </section>
+
+      <section>
+        <h2>5. Termination</h2>
+        <p>
+          You can stop using the app at any time. Admins may remove users who
+          violate these terms or who disrupt the league.
+        </p>
+      </section>
+
+      <section>
+        <h2>6. Disclaimers</h2>
+        <p>
+          The app is provided "as is" without warranty of any kind. We do not
+          guarantee that the service will be uninterrupted, error-free, or
+          available at any particular time.
+        </p>
+      </section>
+
+      <section>
+        <h2>7. Limitation of Liability</h2>
+        <p>
+          Women's All B-Ball is a solo-developer pet project. To the fullest
+          extent permitted by law, the developer is not liable for any damages
+          arising from your use of the app.
+        </p>
+      </section>
+
+      <section>
+        <h2>8. Changes to Terms</h2>
+        <p>
+          These terms may be updated from time to time. Continued use of the app
+          after changes means you accept the revised terms.
+        </p>
+      </section>
+
+      <section>
+        <h2>9. Contact</h2>
+        <p>
+          Questions? Email
+          <a href="mailto:developer@corywmcdonald.com">developer@corywmcdonald.com</a>.
+        </p>
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  .hero {
+    margin-bottom: 2rem;
+  }
+
+  .meta {
+    color: var(--color-text-muted);
+    margin: 0.25rem 0 0;
+    font-size: 0.95rem;
+  }
+
+  section + section {
+    margin-top: 1rem;
+  }
+</style>
